@@ -14,10 +14,12 @@ export default function Home() {
   const [headerRow, setHeaderRow] = useState([]);
 
   useEffect(() => {
-    loadCardsData(cardType).then(setData);
-    cardType === 'FDD'
-      ? setHeaderRow(FDDHeaderRow)
-      : setHeaderRow(LumpSumHeaderRow);
+    if (cardType !== '') {
+      loadCardsData(cardType).then(setData);
+      cardType === 'FDD'
+        ? setHeaderRow(FDDHeaderRow)
+        : setHeaderRow(LumpSumHeaderRow);
+    }
   }, [cardType]);
 
   const handleChange = (event) => {
@@ -30,7 +32,7 @@ export default function Home() {
     <Stack alignItems='center' gap={5} sx={{ paddingX: '5rem' }}>
       {/* Head Tag */}
       <Head>
-        <title>RateCards</title>
+        <title>RateCards App</title>
       </Head>
 
       {/* Main Title */}

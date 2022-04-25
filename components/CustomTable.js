@@ -10,14 +10,14 @@ import {
 
 const CustomTable = ({ headerRow, data }) => {
   return (
-    <TableContainer sx={{}}>
+    <TableContainer>
       <Table stickyHeader aria-label='sticky table'>
         <TableHead>
           <TableRow>
             {headerRow?.map((heading) => (
               <TableCell
                 key={heading.key}
-                style={{ minWidth: '200px', fontWeight: 'bold' }}
+                style={{ minWidth: '150px', fontWeight: 'bold' }}
                 align='right'
               >
                 {heading.label}
@@ -39,7 +39,7 @@ const CustomTable = ({ headerRow, data }) => {
                     : '-';
                 return (
                   <TableCell key={header.key} align='right'>
-                    {value === null ? 'NA' : value}
+                    {value}
                   </TableCell>
                 );
               })}
