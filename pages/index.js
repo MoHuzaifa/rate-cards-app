@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Stack } from '@mui/material';
-import { CSVLink } from 'react-csv';
+import { Stack, Button } from '@mui/material';
+import saveAs from 'file-saver';
 import SelectMenu from '../components/SelectMenu';
 import CustomTable from '../components/CustomTable';
 import loadCardsData from './api/data';
@@ -26,7 +26,40 @@ export default function Home() {
     setCardType(event.target.value);
   };
 
-  const handleClick = () => (cardType === '' ? false : true);
+  const generateCSVObject = () => {
+    const csvArray = [];
+    //Get an array of all attribute names (Column Headers) except rateCardHash & deleted//
+    const headers = headerRow?.reduce((accumulator, current) => {
+      if (current.key !== 'rateCardHash' && current.key !== 'deleted') {
+        accumulator.push(current.key);
+      }
+      return accumulator;
+    }, []);
+    csvArray.push(headers.join(','));
+
+    //Get an array of all the values corresponding to the above extracted headers//
+    for (const row of data) {
+      const values = headers.map((header) => row[header]);
+      csvArray.push(values.join(','));
+    }
+
+    return csvArray.join('\n');
+  };
+
+  const saveFile = (csvData) => {
+    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+    saveAs(
+      blob,
+      cardType === 'FDD' ? 'FDD ratecards.csv' : 'Lumpsum ratecards.csv'
+    );
+  };
+
+  const handleClick = () => {
+    if (cardType !== '') {
+      const csvData = generateCSVObject();
+      saveFile(csvData);
+    }
+  };
 
   return (
     <Stack alignItems='center' gap={5} sx={{ paddingX: '5rem' }}>
@@ -48,26 +81,13 @@ export default function Home() {
       {/* Custom Table */}
       {cardType !== '' && <CustomTable headerRow={headerRow} data={data} />}
 
-      <CSVLink
-        filename={
-          cardType === 'FDD' ? 'FDD ratecards.csv' : 'Lumpsum ratecards.csv'
-        }
-        headers={headerRow}
-        data={data}
+      <Button
+        variant='contained'
         onClick={handleClick}
-        style={{
-          background: cardType === '' ? '#E0E0E0' : '#1565C0',
-          color: cardType === '' ? '#7E7E7E' : '#ffffff',
-          paddingLeft: '2rem',
-          paddingRight: '2rem',
-          paddingTop: '1rem',
-          paddingBottom: '1rem',
-          borderRadius: '0.25rem',
-          cursor: cardType === '' ? 'not-allowed' : 'pointer',
-        }}
+        disabled={cardType === ''}
       >
         Download
-      </CSVLink>
+      </Button>
     </Stack>
   );
 }
