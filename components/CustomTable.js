@@ -10,17 +10,17 @@ import {
 
 const CustomTable = ({ headerRow, data }) => {
   return (
-    <TableContainer sx={{ maxWidth: '900px' }}>
+    <TableContainer sx={{}}>
       <Table stickyHeader aria-label='sticky table'>
         <TableHead>
           <TableRow>
-            {headerRow?.map((heading, index) => (
+            {headerRow?.map((heading) => (
               <TableCell
-                key={index}
+                key={heading.key}
                 style={{ minWidth: '200px', fontWeight: 'bold' }}
                 align='right'
               >
-                {heading}
+                {heading.label}
               </TableCell>
             ))}
           </TableRow>
@@ -32,13 +32,13 @@ const CustomTable = ({ headerRow, data }) => {
               key={row._id}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
-              {headerRow.map((header, index) => {
+              {headerRow.map((header) => {
                 const value =
-                  row.hasOwnProperty(header) && row[header] !== null
-                    ? row[header]?.toString()
+                  row.hasOwnProperty(header.key) && row[header.key] !== null
+                    ? row[header.key]?.toString()
                     : '-';
                 return (
-                  <TableCell key={index} align='right'>
+                  <TableCell key={header.key} align='right'>
                     {value === null ? 'NA' : value}
                   </TableCell>
                 );
