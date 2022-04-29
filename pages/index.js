@@ -1,12 +1,20 @@
 import { useState, useEffect } from 'react';
 import { Stack, Button } from '@mui/material';
 import saveAs from 'file-saver';
-import SelectMenu from '../components/SelectMenu';
-import CustomTable from '../components/CustomTable';
-import loadCardsData from './api/data';
-import { FDDHeaderRow, LumpSumHeaderRow, menuItems } from '../helper';
 import Head from 'next/head';
+
+import { FDDHeaderRow, LumpSumHeaderRow, menuItems } from '../helper';
+import SelectMenu from '../components/SelectMenu';
+import CustomTable from '../components/customTable/CustomTable';
+import loadCardsData from './api/data';
 import styles from '../styles/Home.module.css';
+
+const rateCardTypes = {
+  FDD: 'FDD',
+  LumpSum: 'Lumpsum',
+};
+const RATE_CARD_HASH = 'rateCardHash';
+const DELETED = 'deleted';
 
 export default function Home() {
   const [cardType, setCardType] = useState('');
@@ -14,9 +22,12 @@ export default function Home() {
   const [headerRow, setHeaderRow] = useState([]);
 
   useEffect(() => {
-    if (cardType !== '') {
-      loadCardsData(cardType).then(setData);
-      cardType === 'FDD'
+    if (cardType) {
+      (async () => {
+        const tempData = await loadCardsData(cardType);
+        setData(tempData);
+      })();
+      cardType === rateCardTypes.FDD
         ? setHeaderRow(FDDHeaderRow)
         : setHeaderRow(LumpSumHeaderRow);
     }
@@ -30,7 +41,7 @@ export default function Home() {
     const csvArray = [];
     //Get an array of all attribute names (Column Headers) except rateCardHash & deleted//
     const headers = headerRow?.reduce((accumulator, current) => {
-      if (current.key !== 'rateCardHash' && current.key !== 'deleted') {
+      if (current.key !== RATE_CARD_HASH && current.key !== DELETED) {
         accumulator.push(current.key);
       }
       return accumulator;
@@ -47,18 +58,13 @@ export default function Home() {
   };
 
   const saveFile = (csvData) => {
-    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
-    saveAs(
-      blob,
-      cardType === 'FDD' ? 'FDD ratecards.csv' : 'Lumpsum ratecards.csv'
-    );
+    const file = new File([csvData], `${cardType} ratecards.csv`);
+    saveAs(file);
   };
 
   const handleClick = () => {
-    if (cardType !== '') {
-      const csvData = generateCSVObject();
-      saveFile(csvData);
-    }
+    const csvData = generateCSVObject();
+    saveFile(csvData);
   };
 
   return (
@@ -79,13 +85,9 @@ export default function Home() {
       />
 
       {/* Custom Table */}
-      {cardType !== '' && <CustomTable headerRow={headerRow} data={data} />}
+      {cardType && <CustomTable headerRow={headerRow} data={data} />}
 
-      <Button
-        variant='contained'
-        onClick={handleClick}
-        disabled={cardType === ''}
-      >
+      <Button variant='contained' onClick={handleClick} disabled={!cardType}>
         Download
       </Button>
     </Stack>
